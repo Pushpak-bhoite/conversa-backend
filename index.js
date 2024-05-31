@@ -49,11 +49,21 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+let __filename= fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename);
+console.log('__filename -->', __filename)
+console.log('__dirname -->', __dirname)
+
+
 const base_url = path.join(dirname(fileURLToPath(import.meta.url)), "../backend/")
 console.log('base_url --->)', base_url)
-let x = path.join(base_url, 'uploads')
-console.log('base_url --->)', x)
-app.use('/uploads', express.static(path.join(base_url, 'uploads')));
+
+app.use('/uploads', (req, res, next) => {
+  console.log(`Request received for: ${req.url}`);
+  next(); // Pass the request to the next handler
+});
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(flash());
 mydb();
 const port = 5000;
