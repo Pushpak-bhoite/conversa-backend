@@ -15,7 +15,6 @@ const router = express.Router();
 
 const base_url = path.join(dirname(fileURLToPath(import.meta.url)), "../")
 
-
 router.post('/login', async (req, res) => {
     try {
         const is_user = await user.findOne({ email: req.body.email });

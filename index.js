@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 const result = dotenv.config();
-  console.error(JSON.stringify(result.error));
+console.error(JSON.stringify(result.error));
 import mydb from "./db.js"
 import express from 'express'
 import bodyParser from "body-parser";
@@ -18,6 +18,7 @@ import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { app, server } from "./socket/server.js";
+import { createServer } from 'node:https';    // *******
 import NewGroup from './routes/newGroup.routes.js';
 import changeUserDetails from './routes/changeUserDetails.routes.js';
 import saveImages from './routes/saveImage.routes.js';
@@ -38,9 +39,20 @@ initializingPassport(passport);//PASSPORT=this function working as middleware ch
 // ---------Parsers----------
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({origin:'*'}))
-const base_url=path.join(dirname(fileURLToPath(import.meta.url)),"../backend/")
-console.log(base_url)
+app.use(cors({
+  origin: '*',
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+}))
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const base_url = path.join(dirname(fileURLToPath(import.meta.url)), "../backend/")
+console.log('base_url --->)', base_url)
+let x = path.join(base_url, 'uploads')
+console.log('base_url --->)', x)
 app.use('/uploads', express.static(path.join(base_url, 'uploads')));
 app.use(flash());
 mydb();
@@ -56,10 +68,10 @@ app.get('/', (req, res) => {
 app.use("/api/auth", authRoute)
 app.use("/api/is-login", msgRoute)
 app.use("/api/forgot-pass", forgotPassword)
-app.use("/api/newgroup",NewGroup)
-app.use("/api/changeuserdetails",changeUserDetails)
-app.use("/api/saveImages",saveImages)
+app.use("/api/newgroup", NewGroup)
+app.use("/api/changeuserdetails", changeUserDetails)
+app.use("/api/saveImages", saveImages)
 
-server.listen(port,'0.0.0.0', () => {
+server.listen(port, '0.0.0.0', () => {
   console.log(`http://0.0.0.0:${port}`)
 })
