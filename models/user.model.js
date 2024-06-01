@@ -18,12 +18,12 @@ const user_schema=new Mongoose.Schema({
     phone_no:{
         type:String,
         required:true,
-        unique:true,
+        // unique:true,
     },
     username:{
         type:String,
         required:true,
-        unique:true,
+        // unique:true,
     },
     gender:{
         type:String,
