@@ -14,9 +14,8 @@ async function getSingleMessages(details){
     if(chat_user){
         const messages=await message.find({chat_id:chat_user.id}).populate('sender').sort({createdAt:-1}).limit(1);
         // return {messages:messages,chat_id:chat_data._id};
-        console.log(messages)
+        console.log('messages-->', messages)
         return { new_message: messages[0] }
-
     }
     else
     {

@@ -13,8 +13,8 @@ import { error } from 'console';
 const router = express.Router();
 
 
-const base_url = path.join(dirname(fileURLToPath(import.meta.url)), "../")
-
+const base_url = path.join(dirname(fileURLToPath(import.meta.url)), "..\\")
+console.log('base_url', base_url)
 router.post('/login', async (req, res) => {
     try {
         const is_user = await user.findOne({ email: req.body.email });
@@ -72,52 +72,51 @@ router.post("/signup", async (req, res) => {
     try {
         [fields, files] = await form.parse(req);
 
-    } catch (err) {
-        return res.status(500).send('Error parsing form data');
-        console.log(err)
-    }
-    const hexaPass = await bcrypt.hash(fields.password[0], 10);
-    let isAlreadyUser = await user.findOne({ email: fields.email[0] });
-    let reg_user;
-    if (!isAlreadyUser) {
 
-        let new_user = new user({
-            name: fields.name[0],
-            email: fields.email[0],
-            password: hexaPass,
-            phone_no: fields.phone_no[0],
-            username: fields.username[0],
-            gender: fields.gender[0],
-            dob: fields.dob[0],
-            country: fields.country[0],
-            type: fields.type[0]
-        })
-        // const reg_user = await new_user.save().catch((err) => res.send(err.message));
-        // const reg_user = await new_user.save();
-         reg_user = await new_user.save()
-    } else {
-        res.status(400).send({ error: "Oops... user already exists. Go for sign in " });
-    }
+        const hexaPass = await bcrypt.hash(fields.password[0], 10);
+        let isAlreadyUser = await user.findOne({ email: fields.email[0] });
+        let reg_user;
+        if (!isAlreadyUser) {
 
-
-    try {
+            let new_user = new user({
+                name: fields.name[0],
+                email: fields.email[0],
+                password: hexaPass,
+                phone_no: fields.phone_no[0],
+                username: fields.username[0],
+                gender: fields.gender[0],
+                dob: fields.dob[0],
+                country: fields.country[0],
+                type: fields.type[0]
+            })
+            reg_user = await new_user.save()
+            if (reg_user) {
+                res.status(200).json({ registration: 'successful' });
+            }
+        }
+        else {
+            res.status(400).send({ error: "Oops! User already exists. Go for sign in." });
+        }
 
 
-        if (files.profile_img[0] ) {
+
+
+        if (files.profile_img[0].originalFilename && reg_user) {
             const old_path = files.profile_img[0].filepath
             filename = files.profile_img[0].originalFilename
-            const folder_path = base_url + "uploads/" + reg_user._id
+            const folder_path = base_url + "uploads\\" + reg_user._id
             if (!fs.existsSync(folder_path)) {
                 fs.mkdirSync(folder_path, { recursive: true });
             }
-            const file_path = base_url + "uploads/" + reg_user._id + "/" + filename
+            const file_path = base_url + "uploads\\" + reg_user._id + "\\" + filename
             fs.copyFile(old_path, file_path, function (err) {
                 if (err) throw err
             })
 
             await user.findByIdAndUpdate(reg_user._id, { profile_img: filename })
                 .then((result1) => {
-                    res.status(200).json({ registration: 'successful' });
+                    // res.status(200).json({ registration: 'successful' });
+                    console.log('profile Img saved successfully')
                 })
                 .catch((err) => {
                     console.log('error at SIGN UP :', error)
@@ -125,8 +124,23 @@ router.post("/signup", async (req, res) => {
                 });
         }
 
-    } catch (error) {
-
+    } catch (err) {
+        if (err.code === 11000) {
+            // Duplicate key error
+            console.log('err.code -->)', err.code)
+            res.status(400).send({ error: 'This phone number is already registered. Please use a different number.' });
+        } else if (err.name === 'ValidationError') {
+            // Validation error
+            console.log(' err.name -->)', err.name)
+            const messages = Object.values(err.errors).map(e => e.message);
+            console.log(' messages -->)', messages)
+            res.status(400).send({ error: messages });
+        } else {
+            // General error
+            console.log(' err.name -->)', err)
+            // console.error('Error during sign up:', err);
+            res.status(500).send({ error: 'An error occurred during registration. Please try again later.' });
+        }
     }
 
 

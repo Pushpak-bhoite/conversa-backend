@@ -31,7 +31,7 @@ router.post('/link', async (req, res) => {
         // console.log(user.Email);
 
         const mailOptions = {
-            from: 'pushpakbhoitephotos@gmail.com',
+            from: process.env.EMAIL_FORGOT_PASS,
             to: fmail,
             subject: 'Password Reset Request',
             html: `<P>Please click on the following link to reset your password: ${resetLink}</p>`
@@ -74,7 +74,7 @@ try {
         await user.save();
 
         const mailOptions = {
-            from: 'pushpakbhoitephotos@gmail.com',
+            from: process.env.EMAIL_FORGOT_PASS,
             to: temp,
             subject: 'Password Reset Request',
             html: `<P> Dear sir/mam your password has been reset </p>`

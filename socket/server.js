@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
     socket.on("search_val", data => { sendSearchUser(data) })
     socket.emit("return_greet", "Hello there!!!")
     io.emit("online_users", Object.keys(userSocketMap))
-    socket.on("send_message", (data) => {
+    socket.on("send_message", (data) => {      //data =>const details={ids:{sent_by_user_id,sent_to_user_id},msg:message} (new_message.jxs)
         console.log('send_message -> data', data);
         sendmsg(data, 0);
     })
